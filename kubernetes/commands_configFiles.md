@@ -254,6 +254,29 @@ spec:
 
 #### 6- Skaffold
 
+In skaffold there are 2 modes 
+- First mode is to rebuild images when changes happen and re attach to k8s Which is suitable for some applications that requires rebuild to see changes
+```YAML
+apiVersion: skaffold/v2beta12
+kind: Config
+
+build:
+  artifacts:
+    - image: amnassar/flowise
+      context: .  # Path to the folder to watch for changes
+      docker:
+        dockerfile: Dockerfile.flowise  # Specify your Dockerfile if it's not in the default location
+  local:
+    push: false  # Prevent pushing images to a repository
+deploy:
+  kubectl:
+    manifests:
+      - k8s_dev/*.yaml  # Path to your Kubernetes manifests
+
+```
+
+- Second mode is to detect changes without rebuilding images which is suitable for other applications
+
 ```YAML
     apiVersion: skaffold/v2beta12
     kind: Config
