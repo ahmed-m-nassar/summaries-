@@ -215,3 +215,39 @@ When you expose services in Kubernetes, they are typically accessible only withi
 
 NGINX Ingress Controller acts as the entry point (gateway) that intelligently routes external requests to services within your Kubernetes cluster based on Ingress rules.
 
+# Dev & Production pattern 
+Choosing the right development pattern depends on several factors like the complexity of your application, your team's workflow, and the nature of the deployment environment. Here are some considerations for both approaches—developing with Kubernetes vs. Docker only—and how to select the best pattern for your needs.
+## First Option : Using Kubernetes for Both Development and Production
+- Using Kubernetes in both environments ensures that the behavior in development is nearly identical to production. Any issues related to scaling, networking, service discovery, etc., will be caught earlier.
+- Kubernetes has become the standard for cloud-native applications, so developing within Kubernetes gives you experience and insight into the challenges and opportunities you will encounter in cloud-native production environments.
+- Kubernetes adds complexity to the development environment. 
+- Kubernetes can be resource-heavy on your local machine, 
+
+## Second Option : Using Docker for Development and Kubernetes for Production
+- Docker is much simpler than Kubernetes for local development. 
+- Docker allows for rapid iteration. You can build, run, and test changes in containers very quickly.
+- If you're using Docker locally and Kubernetes in production, there’s a risk that certain Kubernetes-specific behaviors 
+
+## Best Practices: Use Skaffold with K8s in Dev and K8s in prod
+![alt text](image-7.png)
+
+- To align your development environment with your production Kubernetes (K8s) environment in the cloud, it's essential to create a development environment that mimics production as closely as possible while maintaining efficiency.
+
+- Skaffold is a tool specifically designed for Kubernetes development. It automates the build, push, and deploy process in Kubernetes environments, allowing developers to iterate quickly.
+
+- Skaffold can sync files between your local dev environment and the Kubernetes cluster, speeding up feedback loops during development.
+
+
+### Skaffold 2 modes : 
+#### 1. Syncing without Building Images
+In this mode, Skaffold monitors your local source files and automatically syncs changes to your Kubernetes cluster without rebuilding the Docker images. This is useful during development when you want to quickly see changes reflected in your running application.
+
+#### 2. Building Images
+In this mode, Skaffold builds Docker images for your application whenever it detects changes in the source files. After building, it pushes the images to a container registry (if necessary) and then updates the Kubernetes resources to use the new image versions.
+
+#### Note : Here Is how K8s work with skaffold
+1. Skaffold builds the Docker image and tags it
+2. Kubernetes uses this image to create the pod.
+3. **(First Mode)** : File changes are synced directly into the running pod without requiring a full image rebuild, making development faster and more efficient.
+4. **(Second Mode)** : File changes Fire image rebuild, And applying new image build to K8s Pods
+

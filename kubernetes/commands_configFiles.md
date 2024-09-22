@@ -28,6 +28,10 @@
 - chmod +x ./kubectl
 - sudo mv ./kubectl /usr/local/bin/kubectl
 
+## Skaffold
+### Installation
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+sudo install skaffold /usr/local/bin/
 
 ### Verify Installation
 - kubectl version --client
@@ -247,3 +251,60 @@ spec:
 - **metadata.name**: The name of the PVC, my-pvc.
 - **spec.accessModes**: Defines the access mode as ReadWriteOnce, meaning that this storage can be mounted as read-write by only one node at a time.
 - **resources.requests.storage**: Requests a volume of 5GiB.
+
+#### 6- Skaffold
+
+```YAML
+    apiVersion: skaffold/v2beta12
+    kind: Config
+    deploy:
+      kubectl:
+        manifests:
+          - ./k8s/*
+          - ./k8s-dev/*
+    build:
+      local:
+        push: false
+      artifacts:      
+        - image: rallycoding/client-skaffold
+          context: client
+          docker:
+            dockerfile: Dockerfile.dev
+          sync:
+            manual:
+              - src: "src/**/*.js"
+                dest: .
+              - src: "src/**/*.css"
+                dest: .
+              - src: "src/**/*.html"
+                dest: .
+        - image: rallycoding/worker-skaffold
+          context: worker
+          docker:
+            dockerfile: Dockerfile.dev
+          sync:
+            manual:
+              - src: "*.js"
+                dest: .
+        - image: rallycoding/server-skaffold
+          context: server
+          docker:
+            dockerfile: Dockerfile.dev
+          sync:
+            manual:
+              - src: "*.js"
+                dest: .
+```
+- **apiVersion**: Specifies the version of the Skaffold API being used.
+- **kind**: Indicates that this configuration is of type Config.
+- **deploy**: Defines how the application will be deployed.
+- **kubectl**: Specifies the use of kubectl for deployment.
+- **manifests**: Lists the paths to Kubernetes manifest files. Here, it includes all YAML files in both ```./k8s/``` and ```./k8s-dev/``` directories.
+- **build**: Describes how images are built.
+- **local**: Indicates that the images will be built locally.
+- **push**: false: Specifies that images will not be pushed to a remote registry after building.
+- **image**: The name of the Docker image to be built.
+- **context**: The directory context for the build (in this case, the client directory).
+- **docker**: Configuration for building the Docker image, specifying the Dockerfile.dev file.
+- **sync**: Defines manual file syncing:
+- **Files** matching ```src/**/*.js```, ```src/**/*.css```, and ```src/**/*.html``` will be synced from the source directory to the destination in the container whenever changes are detected.'''
